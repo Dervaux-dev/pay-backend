@@ -2,16 +2,15 @@ FROM node:22-alpine
 
 WORKDIR /app
 
-# Copy package files and install dependencies
-COPY package*.json ./
-RUN npm install
+COPY package.json package-lock.json ./
 
-# Copy source code and build
+# Render injects NODE_ENV=production as a build arg, which makes npm skip
+# typescript/@types. Force a full install so `npm run build` can run tsc.
+RUN npm ci --include=dev
+
 COPY . .
 RUN npm run build
 
-# Expose port
 EXPOSE 3000
 
-# Start command
-CMD ["npm", "start"]
+CMD ["node", "dist/index.js"]
